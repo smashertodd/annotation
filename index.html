@@ -1,0 +1,1630 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Annotation Academy | How to Write Effective Annotated Notes</title>
+<style>
+  :root {
+    --ink: #0b3d66;
+    --ink-soft: #3a6a8f;
+    --bg: #f2f5f9;
+    --panel: #ffffff;
+    --line: #dde5ee;
+    --red: #c1121f; --orange: #ea580c; --yellow: #eab308;
+    --green: #5b8c00; --blue: #1d4ed8; --purple:#7c3aed;
+    --cyan:#0891b2; --pink:#be185d;
+    --mono:"SF Mono","Cascadia Code","Consolas","Menlo",monospace;
+    --sans:-apple-system,"Segoe UI","Helvetica Neue",Arial,sans-serif;
+  }
+
+  * { box-sizing:border-box; margin:0; padding:0; }
+
+  body {
+    font-family:var(--sans);
+    background:var(--bg);
+    color:var(--ink);
+    line-height:1.55;
+    font-size:16px;
+  }
+
+  .sr-only {
+    position:absolute;
+    width:1px;
+    height:1px;
+    padding:0;
+    margin:-1px;
+    overflow:hidden;
+    clip:rect(0,0,0,0);
+    white-space:nowrap;
+    border:0;
+  }
+
+  .wrap { max-width:760px; margin:0 auto; padding:0 16px 64px; }
+
+  header.app { background:var(--ink); color:#fff; padding:14px 16px 0; }
+  .app-inner { max-width:760px; margin:0 auto; }
+  .app-title { font-weight:800; font-size:1.05rem; letter-spacing:.01em; }
+  .app-sub { font-size:.8rem; color:#b9c9db; margin:2px 0 12px; }
+
+  .rail { display:flex; gap:4px; height:10px; }
+  .rail span {
+    flex:1;
+    background:#2a4f6e;
+    border-radius:2px 2px 0 0;
+    transition:background .4s;
+  }
+
+  .rail span.done.c1 { background:var(--red); }
+  .rail span.done.c2 { background:var(--orange); }
+  .rail span.done.c3 { background:var(--yellow); }
+  .rail span.done.c4 { background:var(--green); }
+  .rail span.done.c5 { background:var(--blue); }
+  .rail span.done.c6 { background:var(--purple); }
+  .rail span.done.c7 { background:var(--pink); }
+  .rail span.now { background:#5c86a8; animation:pulse 1.6s infinite; }
+
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.45} }
+
+  .screen { display:none; padding-top:28px; }
+  .screen.active { display:block; animation:rise .35s ease; }
+
+  @keyframes rise {
+    from { opacity:0; transform:translateY(8px); }
+    to { opacity:1; transform:none; }
+  }
+
+  h1 { font-size:1.7rem; font-weight:800; line-height:1.2; letter-spacing:-.01em; }
+  h2 { font-size:1.3rem; font-weight:800; margin-bottom:10px; }
+  h3 { font-size:1.02rem; font-weight:700; margin-bottom:6px; }
+  p { margin-bottom:12px; }
+  h1:focus, h2:focus { outline:none; }
+
+  .card {
+    background:var(--panel);
+    border:1px solid var(--line);
+    border-radius:12px;
+    padding:20px;
+    margin-bottom:16px;
+  }
+
+  .btn {
+    display:inline-block;
+    background:var(--ink);
+    color:#fff;
+    border:none;
+    border-radius:8px;
+    padding:12px 22px;
+    font-size:1rem;
+    font-weight:700;
+    font-family:var(--sans);
+    cursor:pointer;
+  }
+
+  .btn:hover:not([disabled]) { background:#124c7d; }
+
+  .btn:focus-visible,
+  .chip:focus-visible,
+  .tok:focus-visible,
+  .opt:focus-visible,
+  .seg button:focus-visible,
+  .flip:focus-visible,
+  .back-link:focus-visible,
+  .lvl-card:focus-visible {
+    outline:3px solid var(--blue);
+    outline-offset:2px;
+  }
+
+  .btn.ghost {
+    background:transparent;
+    color:var(--ink);
+    border:2px solid var(--ink);
+  }
+
+  .btn.ghost:hover:not([disabled]) { background:#e8edf4; }
+
+  .btn[disabled],
+  .seg button[disabled]:not(.on) {
+    background:#e2e8f0;
+    color:#475569;
+    border-color:#cbd5e1;
+    opacity:1;
+    cursor:not-allowed;
+  }
+
+  .back-link {
+    background:transparent;
+    border:none;
+    color:var(--ink-soft);
+    font-family:var(--sans);
+    font-size:.9rem;
+    font-weight:700;
+    cursor:pointer;
+    margin-bottom:16px;
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+  }
+
+  .back-link:hover { color:var(--ink); text-decoration:underline; }
+
+  .kicker {
+    font-family:var(--mono);
+    font-size:.72rem;
+    letter-spacing:.14em;
+    text-transform:uppercase;
+    color:var(--ink-soft);
+    margin-bottom:6px;
+  }
+
+  .foot-actions { display:flex; gap:10px; flex-wrap:wrap; margin-top:8px; }
+
+  .stakes {
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+    font-family:var(--mono);
+    font-size:.75rem;
+    border-radius:999px;
+    padding:5px 12px;
+    font-weight:700;
+    letter-spacing:.03em;
+    margin:6px 0 14px;
+  }
+
+  .stakes .dots { display:inline-flex; gap:3px; }
+  .stakes .dots i {
+    width:8px;
+    height:8px;
+    border-radius:50%;
+    background:currentColor;
+    opacity:.25;
+  }
+
+  .stakes.s1 { background:#eaf1e0; color:#3f6b0a; }
+  .stakes.s1 i:nth-child(1) { opacity:1; }
+  .stakes.s2 { background:#fdf0e3; color:#9a4a06; }
+  .stakes.s2 i:nth-child(-n+2) { opacity:1; }
+  .stakes.s3 { background:#fbe6e7; color:#a10f1a; }
+  .stakes.s3 i { opacity:1; }
+
+  .hero {
+    background:var(--ink);
+    color:#fff;
+    border-radius:14px;
+    padding:30px 24px;
+    margin-bottom:18px;
+  }
+
+  .hero .kicker { color:#a9c2d8; }
+  .hero h1 { color:#fff; margin-bottom:10px; }
+  .hero p { color:#cfe0ee; }
+
+  .timechip {
+    display:inline-block;
+    font-family:var(--mono);
+    font-size:.8rem;
+    background:#124c7d;
+    color:#fff;
+    border-radius:999px;
+    padding:5px 14px;
+    margin-bottom:14px;
+  }
+
+  .lvl-card {
+    display:flex;
+    gap:14px;
+    align-items:flex-start;
+    background:var(--panel);
+    border:1px solid var(--line);
+    border-radius:12px;
+    padding:16px;
+    margin-bottom:12px;
+    width:100%;
+    text-align:left;
+    cursor:pointer;
+    font-family:var(--sans);
+  }
+
+  .lvl-card:hover:not(.locked) { border-color:var(--ink); }
+  .lvl-card.locked { opacity:.45; cursor:not-allowed; }
+
+  .lvl-num {
+    flex:0 0 44px;
+    height:44px;
+    border-radius:10px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-family:var(--mono);
+    font-weight:700;
+    color:#fff;
+    font-size:1.05rem;
+  }
+
+  .lvl-meta { flex:1; }
+  .lvl-meta h3 { margin-bottom:2px; }
+  .lvl-meta .desc { font-size:.9rem; color:var(--ink-soft); }
+  .lvl-state { font-family:var(--mono); font-size:.72rem; margin-top:6px; color:var(--ink-soft); }
+  .lvl-state.done { color:#3f6b0a; font-weight:700; }
+
+  .prob { margin:8px 0; }
+
+  .prob .lbl {
+    display:flex;
+    justify-content:space-between;
+    gap:12px;
+    font-family:var(--mono);
+    font-size:.85rem;
+    margin-bottom:3px;
+  }
+
+  .prob .bar {
+    height:12px;
+    background:#e8edf4;
+    border-radius:6px;
+    overflow:hidden;
+  }
+
+  .prob .bar i {
+    display:block;
+    height:100%;
+    width:0;
+    border-radius:6px;
+    transition:width .8s ease;
+  }
+
+  .chips {
+    display:flex;
+    gap:8px;
+    flex-wrap:wrap;
+    margin:10px 0 16px;
+  }
+
+  .chip {
+    font-family:var(--mono);
+    font-size:.95rem;
+    background:#eef2f7;
+    border:2px solid var(--line);
+    border-radius:8px;
+    padding:8px 16px;
+    cursor:pointer;
+    text-align:left;
+  }
+
+  .chip:hover { border-color:var(--ink); }
+
+  .chip.picked,
+  .chip[aria-pressed="true"] {
+    background:var(--ink);
+    color:#fff;
+    border-color:var(--ink);
+  }
+
+  .sentence {
+    font-family:var(--mono);
+    font-size:1.05rem;
+    background:#eef2f7;
+    border-radius:8px;
+    padding:14px 16px;
+    margin-bottom:10px;
+  }
+
+  .sentence .gap {
+    display:inline-block;
+    min-width:84px;
+    border-bottom:3px solid var(--ink);
+    text-align:center;
+  }
+
+  .tok {
+    font-family:var(--mono);
+    font-size:.98rem;
+    border-radius:8px;
+    padding:9px 16px;
+    cursor:pointer;
+    border:2px solid var(--line);
+    background:#eef2f7;
+  }
+
+  .tok[aria-pressed="true"].gA {
+    background:var(--blue);
+    border-color:var(--blue);
+    color:#fff;
+  }
+
+  .typegrid {
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:12px;
+    margin:12px 0;
+  }
+
+  @media (max-width:520px) {
+    .typegrid { grid-template-columns:1fr; }
+  }
+
+  .flip {
+    border:2px solid var(--line);
+    border-radius:10px;
+    padding:14px;
+    cursor:pointer;
+    background:#eef2f7;
+    text-align:left;
+    font-family:var(--sans);
+  }
+
+  .flip .tt { font-weight:800; display:flex; align-items:center; gap:8px; }
+  .flip .tag { font-family:var(--mono); font-size:.7rem; color:var(--ink-soft); }
+  .flip .body { display:none; margin-top:8px; font-size:.9rem; }
+  .flip.open,
+  .flip[aria-expanded="true"] { background:#fff; border-color:var(--ink); }
+  .flip.open .body,
+  .flip[aria-expanded="true"] .body { display:block; }
+
+  .flip .starter {
+    display:inline-block;
+    font-family:var(--mono);
+    font-size:.82rem;
+    background:#eef2f7;
+    border:1px dashed var(--ink-soft);
+    border-radius:6px;
+    padding:3px 8px;
+    margin:6px 6px 0 0;
+  }
+
+  .opt {
+    display:flex;
+    gap:10px;
+    align-items:flex-start;
+    border:2px solid var(--line);
+    border-radius:10px;
+    padding:12px 14px;
+    margin-bottom:8px;
+    cursor:pointer;
+    background:var(--panel);
+    width:100%;
+    text-align:left;
+    font-family:var(--sans);
+    font-size:.96rem;
+  }
+
+  .opt:hover { border-color:var(--ink); }
+
+  .opt .box {
+    flex:0 0 20px;
+    height:20px;
+    border:2px solid var(--ink-soft);
+    border-radius:5px;
+    margin-top:2px;
+    position:relative;
+  }
+
+  .opt.sel .box,
+  .opt[aria-checked="true"] .box {
+    background:var(--ink);
+    border-color:var(--ink);
+  }
+
+  .opt.sel .box::after,
+  .opt[aria-checked="true"] .box::after {
+    content:"✓";
+    color:#fff;
+    position:absolute;
+    top:-3px;
+    left:3px;
+    font-weight:700;
+  }
+
+  .opt.right { border-color:var(--green); background:#f3f9ec; }
+  .opt.wrong { border-color:var(--red); background:#fdf1f1; }
+  .opt .why { display:none; font-size:.85rem; color:var(--ink-soft); margin-top:4px; }
+  .opt.reveal .why { display:block; }
+
+  .ref {
+    border:1px solid var(--line);
+    border-radius:10px;
+    padding:14px;
+    margin-bottom:12px;
+    background:var(--panel);
+  }
+
+  .seg {
+    display:inline-flex;
+    border:2px solid var(--ink);
+    border-radius:8px;
+    overflow:hidden;
+  }
+
+  .seg button {
+    border:none;
+    background:#fff;
+    color:var(--ink);
+    font-family:var(--sans);
+    font-weight:700;
+    padding:8px 16px;
+    cursor:pointer;
+    font-size:.88rem;
+  }
+
+  .seg button.on,
+  .seg button[aria-pressed="true"] {
+    background:var(--ink);
+    color:#fff;
+  }
+
+  .ref .verdict {
+    display:none;
+    margin-top:10px;
+    font-size:.88rem;
+    border-radius:8px;
+    padding:10px 12px;
+  }
+
+  .ref.reveal .verdict { display:block; }
+  .ref .verdict.ok { background:#f3f9ec; border:1px solid var(--green); }
+  .ref .verdict.bad { background:#fdf1f1; border:1px solid var(--red); }
+  .ref .verdict.mix { background:#fdf6e2; border:1px solid var(--yellow); }
+  .ref .verdict ul { margin:6px 0 0 18px; }
+
+  .round-head {
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:10px;
+    gap:10px;
+    flex-wrap:wrap;
+  }
+
+  .round-dots { display:inline-flex; gap:5px; }
+
+  .round-dots i {
+    width:10px;
+    height:10px;
+    border-radius:50%;
+    background:#d7e0ea;
+  }
+
+  .round-dots i.hit { background:var(--green); }
+  .round-dots i.miss { background:var(--red); }
+  .round-dots i.cur { background:var(--ink); }
+
+  .claim {
+    font-family:var(--mono);
+    font-size:.88rem;
+    background:#eef2f7;
+    color:var(--ink);
+    border:1px solid var(--line);
+    border-radius:10px 10px 10px 2px;
+    padding:12px 14px;
+    margin-bottom:12px;
+  }
+
+  .claim::before {
+    content:"ORIGINAL TEXT:";
+    display:block;
+    font-size:.65rem;
+    letter-spacing:.12em;
+    color:var(--ink-soft);
+    margin-bottom:4px;
+  }
+
+  .claim.student {
+    background:var(--ink);
+    color:#fff;
+    border:none;
+    border-radius:10px 10px 2px 10px;
+  }
+
+  .claim.student::before {
+    content:"STUDENT'S ANNOTATION:";
+    color:#a9c2d8;
+  }
+
+  .prompt-q { font-weight:700; font-size:.92rem; margin:8px 0; }
+
+  .checktrail { list-style:none; margin:10px 0 0; }
+
+  .checktrail li {
+    display:flex;
+    gap:8px;
+    padding:5px 0;
+    font-size:.88rem;
+    border-top:1px dashed rgba(0,0,0,.12);
+  }
+
+  .checktrail li:first-child { border-top:none; }
+
+  .checktrail .step {
+    font-family:var(--mono);
+    font-size:.72rem;
+    font-weight:700;
+    letter-spacing:.05em;
+    flex:0 0 96px;
+    padding-top:2px;
+  }
+
+  .signbadge {
+    display:inline-block;
+    font-family:var(--mono);
+    font-size:.75rem;
+    font-weight:700;
+    letter-spacing:.04em;
+    background:var(--ink);
+    color:#fff;
+    border-radius:999px;
+    padding:5px 13px;
+    margin-top:12px;
+  }
+
+  .signbadge::before { content:"⚑ SIGN: "; }
+
+  .callout {
+    border-left:4px solid var(--blue);
+    background:#eef4fd;
+    border-radius:0 10px 10px 0;
+    padding:14px 16px;
+    margin:14px 0;
+  }
+
+  .callout.warn { border-color:var(--red); background:#fdf1f1; }
+  .callout.go { border-color:var(--green); background:#f3f9ec; }
+  .callout h3 { margin-bottom:4px; }
+
+  .hidden { display:none !important; }
+
+  .ladder { list-style:none; }
+
+  .ladder li {
+    display:flex;
+    gap:12px;
+    align-items:baseline;
+    padding:8px 0;
+    border-bottom:1px dashed var(--line);
+  }
+
+  .ladder li:last-child { border-bottom:none; }
+
+  .ladder .rung {
+    font-family:var(--mono);
+    font-size:.72rem;
+    font-weight:700;
+    letter-spacing:.08em;
+    flex:0 0 108px;
+  }
+
+  .match-grid {
+    display:grid;
+    gap:12px;
+    margin-top:12px;
+  }
+
+  .match-row {
+    border:1px solid var(--line);
+    border-radius:10px;
+    padding:14px;
+    background:#fff;
+  }
+
+  .match-row label {
+    display:block;
+    font-weight:700;
+    margin-bottom:8px;
+  }
+
+  .match-row select {
+    width:100%;
+    font-family:var(--sans);
+    font-size:1rem;
+    color:var(--ink);
+    background:#eef2f7;
+    border:2px solid var(--line);
+    border-radius:8px;
+    padding:10px 12px;
+  }
+
+  .match-row select:focus-visible {
+    outline:3px solid var(--blue);
+    outline-offset:2px;
+  }
+
+  .match-row.right {
+    border-color:var(--green);
+    background:#f3f9ec;
+  }
+
+  .match-row.wrong {
+    border-color:var(--red);
+    background:#fdf1f1;
+  }
+
+  .match-feedback {
+    display:none;
+    font-size:.88rem;
+    color:var(--ink-soft);
+    margin-top:8px;
+  }
+
+  .match-row.reveal .match-feedback { display:block; }
+
+  @media (prefers-reduced-motion: reduce) {
+    * { animation:none !important; transition:none !important; }
+  }
+
+  @media (max-width:480px) {
+    h1 { font-size:1.4rem; }
+    .hero { padding:24px 18px; }
+    .prob .lbl { flex-direction:column; gap:2px; }
+    .ladder li { flex-direction:column; gap:4px; }
+    .ladder .rung { flex:auto; }
+  }
+</style>
+</head>
+
+<body>
+<header class="app">
+  <div class="app-inner">
+    <div class="app-title">Annotation Academy</div>
+    <div class="app-sub">How to write effective annotated notes</div>
+    <div class="rail" id="rail" aria-hidden="true">
+      <span class="c1"></span><span class="c2"></span><span class="c3"></span>
+      <span class="c4"></span><span class="c5"></span><span class="c6"></span><span class="c7"></span>
+    </div>
+    <span class="sr-only" id="railStatus">Progress: no levels complete.</span>
+  </div>
+</header>
+
+<div class="wrap">
+
+<section class="screen active" id="screen-welcome">
+  <div class="hero">
+    <div class="kicker">Bitesize · self-paced</div>
+    <h1 tabindex="-1">How to write effective annotated notes</h1>
+    <span class="timechip">⏱ about 15 minutes · 6 levels</span>
+    <p>Annotating means writing your own short notes on a text as you read it—not copying it but responding to it. This session shows you what good annotation looks like, and gives you practice before your assignment. We'll practise on a short text about evidence-based study techniques.</p>
+  </div>
+
+  <div class="card">
+    <h3>How the levels work</h3>
+    <p>Each level ends with a short activity. Work through them in order, or jump back in anytime from the level map. The colour bar above fills in as you go.</p>
+    <button class="btn" onclick="go('map')">Start Level 1</button>
+  </div>
+</section>
+
+<section class="screen" id="screen-map">
+  <div class="kicker">Level map</div>
+  <h1 tabindex="-1" style="margin-bottom:16px">Pick up where you left off</h1>
+  <div id="map-list"></div>
+</section>
+
+<section class="screen" id="screen-l1">
+  <button class="back-link" onclick="go('map')">← Back to Map</button>
+  <div class="kicker">Level 1 of 6 · about 2 minutes</div>
+  <h2 tabindex="-1">What is annotation, and why bother?</h2>
+  <span class="stakes s1">
+    STAKES: FOUNDATION
+    <span class="sr-only">Difficulty: 1 out of 3</span>
+    <span class="dots" aria-hidden="true"><i></i><i></i><i></i></span>
+  </span>
+
+  <div class="card">
+    <p>Annotation means writing your own short notes on a text as you read it—in the margin, as a comment in a doc, or on a sticky note. You're not copying the text. You're adding comments as you read, showing what you notice, question, connect with, or want to investigate further.</p>
+
+    <div class="sentence" style="font-family:var(--sans)">"Spaced repetition means spreading your study sessions out over days or weeks, rather than cramming everything the night before."</div>
+
+    <p>A good annotation next to that line might say:</p>
+    <p style="color:var(--cyan)"><strong>🔑 "spaced repetition = study a bit, often"</strong></p>
+    <p style="color:var(--blue)"><strong>🔗 "This reminds me of building fitness: short, regular practice works better than one long session."</strong></p>
+
+    <p style="margin-top:12px">Annotating shows your marker you're actually thinking about the material, not just reading over it. Every annotation should show <em>your thinking</em>: a question, a link, a reflection, or a note to check something later.</p>
+  </div>
+
+  <div class="card">
+    <h3>Your turn: spot the good annotation</h3>
+    <p>Here's another line from the same text:</p>
+    <div class="sentence" style="font-family:var(--sans)">"Active recall means testing yourself on material, instead of just re-reading your notes."</div>
+    <p>Which margin note actually shows thinking?</p>
+
+    <div class="chips" id="r1chips" role="group" aria-label="Select the best annotation">
+      <button class="chip" aria-pressed="false">"This is about active recall."</button>
+      <button class="chip" aria-pressed="false">"This is useful."</button>
+      <button class="chip" aria-pressed="false">"Would this work better with flashcards or practice questions?"</button>
+      <button class="chip" aria-pressed="false">"Active recall means testing yourself."</button>
+    </div>
+
+    <button class="btn ghost" id="checkR1" disabled>Check Answer</button>
+
+    <div id="r1result" class="hidden" style="margin-top:16px;">
+      <div class="prob"><div class="lbl"><span>"This is about active recall."</span><span>just restates</span></div><div class="bar"><i data-w="15" style="background:var(--red)"></i></div></div>
+      <div class="prob"><div class="lbl"><span>"This is useful."</span><span>reaction with no reason</span></div><div class="bar"><i data-w="20" style="background:var(--red)"></i></div></div>
+      <div class="prob"><div class="lbl"><span>"Would this work better with flashcards or practice questions?"</span><span>real question, shows thinking</span></div><div class="bar"><i data-w="92" style="background:var(--green)"></i></div></div>
+      <div class="prob"><div class="lbl"><span>"Active recall means testing yourself."</span><span>copies the definition</span></div><div class="bar"><i data-w="5" style="background:var(--red)"></i></div></div>
+
+      <div class="callout go">
+        <h3>The learning point</h3>
+        <p style="margin:0">Only one of these shows genuine thinking. The rest either repeat the text, react with no explanation, or are not clearly in your own words. Level 4 digs into descriptive vs analytical annotations in more depth.</p>
+      </div>
+
+      <button class="btn" onclick="completeLevel(1)">Level 1 complete →</button>
+    </div>
+  </div>
+</section>
+
+<section class="screen" id="screen-l2">
+  <button class="back-link" onclick="go('map')">← Back to Map</button>
+  <div class="kicker">Level 2 of 6 · about 3 minutes</div>
+  <h2 tabindex="-1">The six types of annotation</h2>
+  <span class="stakes s1">
+    STAKES: FOUNDATION
+    <span class="sr-only">Difficulty: 1 out of 3</span>
+    <span class="dots" aria-hidden="true"><i></i><i></i><i></i></span>
+  </span>
+
+  <div class="card">
+    <p>Good annotations usually fall into one of six types. Tap each card to see what it looks like in practice.</p>
+
+    <div class="typegrid" id="typegrid">
+      <button class="flip" aria-expanded="false">
+        <div class="tt">📌 Summary <span class="tag">restate the idea</span></div>
+        <div class="body">Restate the main idea in your own words.
+          <div><span class="starter">This means…</span><span class="starter">In other words…</span></div>
+          <p style="margin-top:8px"><em>"This means testing yourself works better than just re-reading."</em></p>
+        </div>
+      </button>
+
+      <button class="flip" aria-expanded="false">
+        <div class="tt">❓ Question <span class="tag">ask something real</span></div>
+        <div class="body">Ask about something unclear or surprising.
+          <div><span class="starter">I wonder why…</span><span class="starter">What if…?</span></div>
+          <p style="margin-top:8px"><em>"I wonder if this works the same for maths as it does for essays."</em></p>
+        </div>
+      </button>
+
+      <button class="flip" aria-expanded="false">
+        <div class="tt">🔗 Connection <span class="tag">link it elsewhere</span></div>
+        <div class="body">Link the idea to something else — class, life, another theory, or a practical example.
+          <div><span class="starter">This links to…</span><span class="starter">This reminds me of…</span></div>
+          <p style="margin-top:8px"><em>"This links to how I learnt road rules better when I tested myself instead of only reading them."</em></p>
+        </div>
+      </button>
+
+      <button class="flip" aria-expanded="false">
+        <div class="tt">💭 Reflection <span class="tag">why it matters</span></div>
+        <div class="body">Say why the idea matters or how it changes your thinking.
+          <div><span class="starter">This matters because…</span><span class="starter">Now I think…</span></div>
+          <p style="margin-top:8px"><em>"This matters because I've been re-reading my notes, not actually testing myself."</em></p>
+        </div>
+      </button>
+
+      <button class="flip" aria-expanded="false">
+        <div class="tt">🔍 Investigate <span class="tag">check it later</span></div>
+        <div class="body">Note something to check or research later.
+          <div><span class="starter">I need to check…</span><span class="starter">I want to look up…</span></div>
+          <p style="margin-top:8px"><em>"I need to check what 'interleaving' means."</em></p>
+        </div>
+      </button>
+
+      <button class="flip" aria-expanded="false">
+        <div class="tt">🔑 Key term <span class="tag">define it</span></div>
+        <div class="body">Define an important word or concept in your own words.
+          <div><span class="starter">Key term: ___ means…</span></div>
+          <p style="margin-top:8px"><em>"Retrieval practice = deliberately trying to recall information rather than looking it up."</em></p>
+        </div>
+      </button>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>Your turn: pick your two</h3>
+    <p>You don't need all six types every time, but it's good to have a variety. Tap the two types you find easiest to use, so you know where to start.</p>
+
+    <div class="chips" id="tokset">
+      <button class="tok" data-name="Summary" aria-pressed="false">📌 Summary</button>
+      <button class="tok" data-name="Question" aria-pressed="false">❓ Question</button>
+      <button class="tok" data-name="Connection" aria-pressed="false">🔗 Connection</button>
+      <button class="tok" data-name="Reflection" aria-pressed="false">💭 Reflection</button>
+      <button class="tok" data-name="Investigate" aria-pressed="false">🔍 Investigate</button>
+      <button class="tok" data-name="Key term" aria-pressed="false">🔑 Key term</button>
+    </div>
+
+    <button class="btn ghost" id="tokReveal" disabled onclick="revealTokens()">See my picks</button>
+
+    <div id="tokResult" class="hidden">
+      <div class="callout">
+        <h3>There's no single right pair</h3>
+        <p id="pickSummary" style="margin:0"></p>
+      </div>
+      <button class="btn" onclick="completeLevel(2)">Level 2 complete →</button>
+    </div>
+  </div>
+</section>
+
+<section class="screen" id="screen-l3">
+  <button class="back-link" onclick="go('map')">← Back to Map</button>
+  <div class="kicker">Level 3 of 6 · about 2 minutes</div>
+  <h2 tabindex="-1">Word bank in action</h2>
+  <span class="stakes s2">
+    STAKES: BUILD THE HABIT
+    <span class="sr-only">Difficulty: 2 out of 3</span>
+    <span class="dots" aria-hidden="true"><i></i><i></i><i></i></span>
+  </span>
+
+  <div class="card">
+    <p>Stuck for what to write? Use a sentence starter from the word bank. Try finishing this one:</p>
+
+    <div class="sentence" style="font-family:var(--sans)">Original text: "Retrieval practice means deliberately recalling information from memory instead of just looking it back up."</div>
+    <div class="sentence">❓ I wonder <span class="gap">?</span></div>
+
+    <div class="chips" id="r2chips" role="group" aria-label="Select the best ending">
+      <button class="chip" aria-pressed="false">…if this works better than highlighting</button>
+      <button class="chip" aria-pressed="false">…not sure</button>
+      <button class="chip" aria-pressed="false">…about an unrelated question</button>
+    </div>
+
+    <button class="btn ghost" id="checkR2" disabled>Check Answer</button>
+
+    <div id="r3result" class="hidden" style="margin-top:16px;">
+      <div class="prob"><div class="lbl"><span>…if this works better than highlighting</span><span>genuine question</span></div><div class="bar"><i data-w="90" style="background:var(--green)"></i></div></div>
+      <div class="prob"><div class="lbl"><span>…not sure</span><span>too vague on its own</span></div><div class="bar"><i data-w="15" style="background:var(--red)"></i></div></div>
+      <div class="prob"><div class="lbl"><span>…about an unrelated question</span><span>off-topic</span></div><div class="bar"><i data-w="2" style="background:var(--red)"></i></div></div>
+
+      <p style="margin-top:24px"><strong>Now try a Connection starter</strong> on the same line:</p>
+      <div class="sentence">🔗 This reminds me of <span class="gap">?</span></div>
+
+      <div class="chips" id="r3chips" role="group" aria-label="Select the best ending">
+        <button class="chip" aria-pressed="false">…how I built confidence through short, regular practice sessions</button>
+        <button class="chip" aria-pressed="false">…this is confusing, but I need to identify which part is unclear</button>
+        <button class="chip" aria-pressed="false">…I cannot think of a connection yet</button>
+      </div>
+
+      <button class="btn ghost" id="checkR3" disabled>Check Answer</button>
+
+      <div id="r4result" class="hidden" style="margin-top:16px;">
+        <div class="prob"><div class="lbl"><span>…how I built confidence through short, regular practice sessions</span><span>specific, personal</span></div><div class="bar"><i data-w="88" style="background:var(--green)"></i></div></div>
+        <div class="prob"><div class="lbl"><span>…this is confusing, but I need to identify which part is unclear</span><span>shows some thinking, but not a connection</span></div><div class="bar"><i data-w="40" style="background:var(--orange)"></i></div></div>
+        <div class="prob"><div class="lbl"><span>…I cannot think of a connection yet</span><span>honest, but does not add analysis yet</span></div><div class="bar"><i data-w="12" style="background:var(--red)"></i></div></div>
+
+        <div class="callout go">
+          <h3>The learning point</h3>
+          <p style="margin:0">A sentence starter only works if you finish it with something specific and relevant. If you write “I wonder… not sure”, add what you are unsure about. If you write “This reminds me of…”, name the specific experience, idea, or example it connects to.</p>
+        </div>
+
+        <button class="btn" onclick="completeLevel(3)">Level 3 complete →</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="screen" id="screen-l4">
+  <button class="back-link" onclick="go('map')">← Back to Map</button>
+  <div class="kicker">Level 4 of 6 · about 4 minutes</div>
+  <h2 tabindex="-1">Descriptive vs analytical: judge the annotation</h2>
+  <span class="stakes s3">
+    STAKES: CRITICAL · THIS IS WHAT GETS MARKED
+    <span class="sr-only">Difficulty: 3 out of 3</span>
+    <span class="dots" aria-hidden="true"><i></i><i></i><i></i></span>
+  </span>
+
+  <div class="card">
+    <p><strong>Practice bank.</strong> Below are six real-looking pairs: a line of text, and a student's annotation next to it. At Level 4, annotations should move beyond simply describing or repeating and show analytical thinking. Make your call, then see why.</p>
+
+    <div id="refGame">
+      <div class="round-head">
+        <span class="kicker" style="margin:0">Example <span id="refRoundNum">1</span> of <span id="refRoundTotal">6</span></span>
+        <span class="round-dots" id="refDots" aria-hidden="true"></span>
+      </div>
+
+      <div class="ref" id="refCard">
+        <div id="refPrompt" class="claim"></div>
+        <div id="refClaim" class="claim student hidden"></div>
+        <p class="prompt-q">Your call:</p>
+
+        <div class="seg">
+          <button id="refBtnReal" data-v="analytical" aria-pressed="false">Analytical</button>
+          <button id="refBtnFake" data-v="descriptive" aria-pressed="false">Descriptive</button>
+        </div>
+
+        <div id="refVerdict" class="verdict"></div>
+      </div>
+
+      <button class="btn hidden" id="refNext" onclick="nextRef()">Next example →</button>
+    </div>
+
+    <div id="refSummary" class="hidden">
+      <div class="callout" id="refScoreBox">
+        <h3>Your score: <span id="refScore"></span> of 6 called correctly</h3>
+        <p id="refScoreMsg" style="margin:0"></p>
+      </div>
+
+      <div class="callout go">
+        <h3>The rule of thumb</h3>
+        <p style="margin:0">An analytical annotation shows <em>your</em> thinking: a real question, a specific link, or a genuine reflection. A descriptive one just restates the text or reacts with no clear explanation, so it may not prove you understood the material.</p>
+      </div>
+
+      <button class="btn" onclick="completeLevel(4)">Level 4 complete →</button>
+    </div>
+  </div>
+</section>
+
+<section class="screen" id="screen-l5">
+  <button class="back-link" onclick="go('map')">← Back to Map</button>
+  <div class="kicker">Level 5 of 6 · about 3 minutes</div>
+  <h2 tabindex="-1">Annotate a whole paragraph</h2>
+  <span class="stakes s3">
+    STAKES: APPLY IT
+    <span class="sr-only">Difficulty: 3 out of 3</span>
+    <span class="dots" aria-hidden="true"><i></i><i></i><i></i></span>
+  </span>
+
+  <div class="card">
+    <h3>Worked example: four annotations on one paragraph</h3>
+    <p><strong>Short paragraph:</strong></p>
+
+    <div class="sentence" style="font-family:var(--sans)">
+      "Students often feel that re-reading their notes is a useful study strategy because it feels familiar and comfortable. However, research on learning suggests that methods requiring effort, such as self-testing, spaced practice, and explaining ideas in your own words, usually lead to stronger long-term understanding."
+    </div>
+
+    <ul class="ladder">
+      <li>
+        <span class="rung" style="color:var(--cyan)">KEY TERM</span>
+        <span><strong>Self-testing</strong> means trying to answer questions from memory before checking the notes.</span>
+      </li>
+      <li>
+        <span class="rung" style="color:var(--blue)">CONNECTION</span>
+        <span>This links to how I remember practical steps better when I practise them without looking at instructions first.</span>
+      </li>
+      <li>
+        <span class="rung" style="color:var(--purple)">REFLECTION</span>
+        <span>This matters because I often choose the study method that feels easiest, not the one that helps me remember more later.</span>
+      </li>
+      <li>
+        <span class="rung" style="color:var(--orange)">INVESTIGATE</span>
+        <span>I need to check what “spaced practice” looks like for this course — daily review, weekly review, or both?</span>
+      </li>
+    </ul>
+
+    <div class="callout go">
+      <h3>Why this works</h3>
+      <p style="margin:0">The annotations are short, varied, and linked to specific parts of the paragraph. They do more than repeat the text: they define, connect, reflect, and identify something to check.</p>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>Your turn: match the annotation type</h3>
+    <p>Read each annotation from the worked example. Choose the annotation type it best matches.</p>
+
+    <div class="match-grid" id="matchActivity">
+      <div class="match-row" data-answer="Key term">
+        <label for="match1">“Self-testing means trying to answer questions from memory before checking the notes.”</label>
+        <select id="match1">
+          <option value="">Choose a type…</option>
+          <option>📌Summary</option>
+          <option>❓Question</option>
+          <option>🔗Connection</option>
+          <option>💭Reflection</option>
+          <option>🔍Investigate</option>
+          <option>🔑Key term</option>
+        </select>
+        <div class="match-feedback">Correct: this defines the important term “self-testing”.</div>
+      </div>
+
+      <div class="match-row" data-answer="Connection">
+        <label for="match2">“This links to how I remember practical steps better when I practise them without looking at instructions first.”</label>
+        <select id="match2">
+          <option value="">Choose a type…</option>
+          <option>Summary</option>
+          <option>Question</option>
+          <option>Connection</option>
+          <option>Reflection</option>
+          <option>Investigate</option>
+          <option>Key term</option>
+        </select>
+        <div class="match-feedback">Correct: this connects the reading to another practical learning situation.</div>
+      </div>
+
+      <div class="match-row" data-answer="Reflection">
+        <label for="match3">“This matters because I often choose the study method that feels easiest, not the one that helps me remember more later.”</label>
+        <select id="match3">
+          <option value="">Choose a type…</option>
+          <option>Summary</option>
+          <option>Question</option>
+          <option>Connection</option>
+          <option>Reflection</option>
+          <option>Investigate</option>
+          <option>Key term</option>
+        </select>
+        <div class="match-feedback">Correct: this explains why the idea matters to the learner’s own study habits.</div>
+      </div>
+
+      <div class="match-row" data-answer="Investigate">
+        <label for="match4">“I need to check what ‘spaced practice’ looks like for this course — daily review, weekly review, or both?”</label>
+        <select id="match4">
+          <option value="">Choose a type…</option>
+          <option>Summary</option>
+          <option>Question</option>
+          <option>Connection</option>
+          <option>Reflection</option>
+          <option>Investigate</option>
+          <option>Key term</option>
+        </select>
+        <div class="match-feedback">Correct: this identifies something to check later.</div>
+      </div>
+    </div>
+
+    <button class="btn ghost" id="checkMatch" onclick="checkMatchActivity()">Check my matches</button>
+
+    <div id="matchResult" class="hidden">
+      <div class="callout go">
+        <h3>Your score: <span id="matchScore">0</span> of 4</h3>
+        <p style="margin:0">Whole-paragraph annotation works best when your notes are varied and linked to specific parts of the paragraph. Aim for quality and variety, not a note on every line.</p>
+      </div>
+      <button class="btn" onclick="completeLevel(5)">Level 5 complete →</button>
+    </div>
+  </div>
+</section>
+
+<section class="screen" id="screen-l6">
+  <button class="back-link" onclick="go('map')">← Back to Map</button>
+  <div class="kicker">Level 6 of 6 · about 1 minute</div>
+  <h2 tabindex="-1">Checklist before you submit</h2>
+  <span class="stakes s2">
+    STAKES: FINAL CHECK
+    <span class="sr-only">Difficulty: 2 out of 3</span>
+    <span class="dots" aria-hidden="true"><i></i><i></i><i></i></span>
+  </span>
+
+  <div class="card">
+    <p><strong>Scenario.</strong> You're about to submit your annotated slides or textbook section. What should you check first? Select all that apply.</p>
+
+    <div id="biasOpts" role="group" aria-label="Pre-submission checklist options">
+      <button class="opt" role="checkbox" aria-checked="false" data-correct="1">
+        <span class="box"></span>
+        <span>I annotated the slides <strong>or</strong> the textbook, not both<span class="why">Yes. Pick one source and go deep, rather than spreading thin across both.</span></span>
+      </button>
+
+      <button class="opt" role="checkbox" aria-checked="false" data-correct="1">
+        <span class="box"></span>
+        <span>I used my own words throughout<span class="why">Yes. Copied definitions or rewordings do not show your analytical thinking clearly.</span></span>
+      </button>
+
+      <button class="opt" role="checkbox" aria-checked="false" data-correct="1">
+        <span class="box"></span>
+        <span>I used more than one type of annotation<span class="why">Yes. A mix of questions, connections, and reflections shows a fuller range of thinking.</span></span>
+      </button>
+
+      <button class="opt" role="checkbox" aria-checked="false" data-correct="1">
+        <span class="box"></span>
+        <span>I noted the page numbers or source details<span class="why">Yes. This supports academic integrity and makes referencing much easier later.</span></span>
+      </button>
+
+      <button class="opt" role="checkbox" aria-checked="false" data-correct="1">
+        <span class="box"></span>
+        <span>I didn't annotate every single line<span class="why">Yes. 8–12 well-chosen spots usually beats a margin note on every sentence.</span></span>
+      </button>
+
+      <button class="opt" role="checkbox" aria-checked="false" data-correct="0">
+        <span class="box"></span>
+        <span>I made sure every annotation is at least two sentences long<span class="why">No. Length is not the point — a sharp one-line question can be stronger than a rambling paragraph.</span></span>
+      </button>
+    </div>
+
+    <button class="btn ghost" onclick="checkBias()">Check my answer</button>
+
+    <div id="biasResult" class="hidden" style="margin-top:16px;">
+      <div class="callout go">
+        <h3>The learning point</h3>
+        <p style="margin:0">A good annotation set is chosen carefully, written in your own words, varied in type, tracks your sources, and is readable by someone else. If your marker can easily follow your analytical thinking, you've done it right.</p>
+      </div>
+
+      <button class="btn" onclick="completeLevel(6)">Finish →</button>
+    </div>
+  </div>
+</section>
+
+<section class="screen" id="screen-finish">
+  <div class="kicker">Complete</div>
+  <h2 tabindex="-1">You're ready to annotate</h2>
+
+  <div class="card">
+    <h3>What you covered</h3>
+    <ul class="ladder">
+      <li><span class="rung" style="color:var(--red)">LEVEL 1</span><span>Annotation is responding to a text in your own words, not copying it.</span></li>
+      <li><span class="rung" style="color:var(--orange)">LEVEL 2</span><span>Six types: summary, question, connection, reflection, investigate, key term.</span></li>
+      <li><span class="rung" style="color:var(--yellow)">LEVEL 3</span><span>Word bank starters only work if you finish them with something specific and relevant.</span></li>
+      <li><span class="rung" style="color:var(--green)">LEVEL 4</span><span>Analytical annotations show thinking; descriptive ones restate or react thinly.</span></li>
+      <li><span class="rung" style="color:var(--blue)">LEVEL 5</span><span>A strong paragraph set uses varied annotations linked to specific parts of the text.</span></li>
+      <li><span class="rung" style="color:var(--purple)">LEVEL 6</span><span>Before submitting: single source, own words, mixed types, note your sources, and choose quality over quantity.</span></li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <h3>Quick practice (2 minutes)</h3>
+    <p>Read one paragraph from your lecture slides or textbook. Write three annotations: one question, one connection, one reflection. Check each one shows <em>your</em> analytical thinking, not just the text repeated.</p>
+  </div>
+
+  <div class="foot-actions" style="justify-content:center">
+    <button class="btn ghost" onclick="restart()">Start again</button>
+  </div>
+</section>
+
+</div>
+
+<script>
+(() => {
+  "use strict";
+
+  const TOTAL_LEVELS = 6;
+  let state = { unlocked:1, done:Array(TOTAL_LEVELS).fill(false) };
+
+  const LEVELS = [
+    { n:1, color:"var(--red)", title:"What is annotation, and why bother?", desc:"The basics and why it matters", stakes:"Foundation" },
+    { n:2, color:"var(--orange)", title:"The six types of annotation", desc:"Summary, question, connection, reflection, investigate, key term", stakes:"Foundation" },
+    { n:3, color:"var(--yellow)", title:"Word bank in action", desc:"Finishing sentence starters with real thinking", stakes:"Build the habit" },
+    { n:4, color:"var(--green)", title:"Descriptive vs analytical", desc:"Judge six real-looking examples", stakes:"Critical: this is what gets marked" },
+    { n:5, color:"var(--blue)", title:"Annotate a whole paragraph", desc:"Worked example and matching activity", stakes:"Apply it" },
+    { n:6, color:"var(--purple)", title:"Checklist", desc:"Final check before you submit", stakes:"Final check" }
+  ];
+
+  window.go = (id) => {
+    document.querySelectorAll(".screen").forEach(screen => screen.classList.remove("active"));
+
+    const targetScreen = document.getElementById(`screen-${id}`);
+    targetScreen.classList.add("active");
+
+    window.scrollTo(0,0);
+
+    const heading = targetScreen.querySelector("h1, h2");
+    if (heading) heading.focus();
+
+    if (id === "map") renderMap();
+
+    updateRail(id);
+    animateBars(targetScreen);
+  };
+
+  const updateRail = (current) => {
+    const cells = document.querySelectorAll("#rail span");
+
+    for (let i = 0; i < TOTAL_LEVELS; i++) {
+      cells[i].className = `c${i + 1}`;
+      if (state.done[i]) cells[i].classList.add("done");
+      else if (current === `l${i + 1}`) cells[i].classList.add("now");
+    }
+
+    cells[TOTAL_LEVELS].className = `c${TOTAL_LEVELS + 1}`;
+
+    if (state.done.every(d => d)) cells[TOTAL_LEVELS].classList.add("done");
+    else if (current === "finish") cells[TOTAL_LEVELS].classList.add("now");
+
+    const completeCount = state.done.filter(Boolean).length;
+    const status = document.getElementById("railStatus");
+    if (status) status.textContent = `Progress: ${completeCount} of ${TOTAL_LEVELS} levels complete.`;
+  };
+
+  const renderMap = () => {
+    const list = document.getElementById("map-list");
+    list.innerHTML = "";
+
+    LEVELS.forEach(lv => {
+      const locked = lv.n > state.unlocked;
+      const done = state.done[lv.n - 1];
+      const b = document.createElement("button");
+
+      b.className = `lvl-card${locked ? " locked" : ""}`;
+      b.disabled = locked;
+      b.innerHTML = `
+        <span class="lvl-num" style="background:${lv.color}">${lv.n}</span>
+        <span class="lvl-meta">
+          <h3>${lv.title}</h3>
+          <span class="desc">${lv.desc} · ${lv.stakes}</span>
+          <div class="lvl-state${done ? " done" : ""}">
+            ${done ? "✓ COMPLETE · TAP TO REVISIT" : (locked ? "LOCKED" : "READY")}
+          </div>
+        </span>
+      `;
+
+      if (!locked) b.onclick = () => go(`l${lv.n}`);
+      list.appendChild(b);
+    });
+
+    if (state.done.every(d => d)) {
+      const f = document.createElement("button");
+      f.className = "lvl-card";
+      f.innerHTML = `
+        <span class="lvl-num" style="background:var(--pink)">✓</span>
+        <span class="lvl-meta">
+          <h3>Finish</h3>
+          <span class="desc">Recap and next steps</span>
+        </span>
+      `;
+      f.onclick = () => go("finish");
+      list.appendChild(f);
+    }
+  };
+
+  window.completeLevel = (n) => {
+    state.done[n - 1] = true;
+    if (state.unlocked < n + 1) state.unlocked = n + 1;
+    go(n === TOTAL_LEVELS ? "finish" : "map");
+  };
+
+  window.restart = () => {
+    state.unlocked = 1;
+    state.done = Array(TOTAL_LEVELS).fill(false);
+    resetActivities();
+    go("welcome");
+  };
+
+  const animateBars = (scope) => {
+    const bars = scope.querySelectorAll(".prob .bar i");
+    bars.forEach(el => {
+      el.style.width = "0";
+      requestAnimationFrame(() => {
+        setTimeout(() => {
+          el.style.width = `${el.getAttribute("data-w")}%`;
+        }, 60);
+      });
+    });
+  };
+
+  const setupSingleChoiceQuiz = (chipsId, checkBtnId, resultId) => {
+    const chips = document.querySelectorAll(`#${chipsId} .chip`);
+    const checkBtn = document.getElementById(checkBtnId);
+
+    chips.forEach(c => {
+      c.addEventListener("click", () => {
+        chips.forEach(x => {
+          x.classList.remove("picked");
+          x.setAttribute("aria-pressed", "false");
+        });
+
+        c.classList.add("picked");
+        c.setAttribute("aria-pressed", "true");
+        checkBtn.disabled = false;
+      });
+    });
+
+    checkBtn.addEventListener("click", () => {
+      const result = document.getElementById(resultId);
+      result.classList.remove("hidden");
+      animateBars(result);
+      checkBtn.classList.add("hidden");
+    });
+  };
+
+  setupSingleChoiceQuiz("r1chips", "checkR1", "r1result");
+  setupSingleChoiceQuiz("r2chips", "checkR2", "r3result");
+  setupSingleChoiceQuiz("r3chips", "checkR3", "r4result");
+
+  const flips = document.querySelectorAll("#typegrid .flip");
+
+  flips.forEach(f => {
+    f.addEventListener("click", () => {
+      const isOpen = f.classList.contains("open");
+
+      flips.forEach(x => {
+        x.classList.remove("open");
+        x.setAttribute("aria-expanded", "false");
+      });
+
+      if (!isOpen) {
+        f.classList.add("open");
+        f.setAttribute("aria-expanded", "true");
+      }
+    });
+  });
+
+  const toks = document.querySelectorAll("#tokset .tok");
+
+  const tokAssignedCount = () =>
+    Array.from(toks).filter(t => t.classList.contains("gA")).length;
+
+  toks.forEach(t => {
+    t.addEventListener("click", () => {
+      const isSelected = t.classList.contains("gA");
+      t.classList.toggle("gA");
+      t.setAttribute("aria-pressed", !isSelected ? "true" : "false");
+      document.getElementById("tokReveal").disabled = tokAssignedCount() < 2;
+    });
+  });
+
+  window.revealTokens = () => {
+    const picked = Array.from(toks)
+      .filter(t => t.classList.contains("gA"))
+      .map(t => t.getAttribute("data-name"));
+
+    document.getElementById("pickSummary").textContent =
+      `You picked ${picked.join(" and ")}. Whatever you chose, starting with these two on your next annotation task will build the habit. Add more types as you get more confident.`;
+
+    document.getElementById("tokResult").classList.remove("hidden");
+  };
+
+  const setupChecklist = (containerId) => {
+    document.querySelectorAll(`#${containerId} .opt`).forEach(o => {
+      o.addEventListener("click", () => {
+        if (o.classList.contains("reveal")) return;
+        const isSelected = o.classList.toggle("sel");
+        o.setAttribute("aria-checked", isSelected ? "true" : "false");
+      });
+    });
+  };
+
+  const gradeChecklist = (containerId) => {
+    document.querySelectorAll(`#${containerId} .opt`).forEach(o => {
+      const correct = o.getAttribute("data-correct") === "1";
+      const selected = o.classList.contains("sel");
+
+      o.classList.add("reveal");
+      o.classList.remove("right","wrong");
+      o.classList.add(correct === selected ? "right" : "wrong");
+    });
+  };
+
+  setupChecklist("biasOpts");
+
+  window.checkBias = () => {
+    gradeChecklist("biasOpts");
+    document.getElementById("biasResult").classList.remove("hidden");
+  };
+
+  window.checkMatchActivity = () => {
+    const rows = document.querySelectorAll("#matchActivity .match-row");
+    let score = 0;
+
+    rows.forEach(row => {
+      const answer = row.getAttribute("data-answer");
+      const select = row.querySelector("select");
+      const chosen = select.value;
+
+      row.classList.add("reveal");
+      row.classList.remove("right","wrong");
+
+      if (chosen === answer) {
+        score++;
+        row.classList.add("right");
+      } else {
+        row.classList.add("wrong");
+        const feedback = row.querySelector(".match-feedback");
+        feedback.textContent = `Correct answer: ${answer}.`;
+      }
+    });
+
+    document.getElementById("matchScore").textContent = score;
+    document.getElementById("matchResult").classList.remove("hidden");
+    document.getElementById("checkMatch").classList.add("hidden");
+  };
+
+  const REFBANK = [
+    {
+      prompt:'"Active recall means testing yourself on material instead of just re-reading it."',
+      cite:'"📌 This is about active recall, which is testing yourself instead of re-reading."',
+      answer:"descriptive",
+      vClass:"bad",
+      vTitle:"Descriptive: it just restates.",
+      checks:[
+        ["OWN WORDS?","No — it is very close to the wording of the original."],
+        ["THINKING SHOWN?","Not enough. It repeats the idea but does not add analysis."]
+      ],
+      sign:"THE RESTATER",
+      note:"This annotation swaps a few words but says little new. It shows the student read the sentence, but not that they analysed it."
+    },
+    {
+      prompt:'"Spaced repetition means spreading study sessions out over days or weeks rather than cramming the night before."',
+      cite:'"🔗 This is like how regular short practice sessions help me build confidence better than one long session at the end."',
+      answer:"analytical",
+      vClass:"ok",
+      vTitle:"Analytical: a real connection.",
+      checks:[
+        ["OWN WORDS?","Yes, entirely."],
+        ["THINKING SHOWN?","Yes — it links the concept to a specific practical example."]
+      ],
+      sign:"THE CONNECTOR",
+      note:"This uses a specific example. It shows the student understands the concept well enough to apply it elsewhere."
+    },
+    {
+      prompt:'"Interleaving means mixing different topics or problem types within a single study session, rather than blocking one topic at a time."',
+      cite:'"💭 This is useful."',
+      answer:"descriptive",
+      vClass:"bad",
+      vTitle:"Descriptive: no reason given.",
+      checks:[
+        ["OWN WORDS?","Yes, but there is very little to assess."],
+        ["THINKING SHOWN?","Not enough. It does not explain why the idea is useful."]
+      ],
+      sign:"THE THIN REACTION",
+      note:"A short reaction can work, but only if it includes a reason. This one does not yet show analytical thinking."
+    },
+    {
+      prompt:'"Retrieval practice means deliberately trying to recall information from memory, which strengthens it more than simply rereading."',
+      cite:'"❓ What happens if I use retrieval practice for practical skills, not just facts — would it still work for something like a driving manoeuvre?"',
+      answer:"analytical",
+      vClass:"ok",
+      vTitle:"Analytical: a genuine question.",
+      checks:[
+        ["OWN WORDS?","Yes."],
+        ["THINKING SHOWN?","Yes — it connects the idea to a new situation and raises a real question."]
+      ],
+      sign:"THE QUESTIONER",
+      note:"This question shows the student is thinking beyond the paragraph, not just within it. That is useful Level 4 annotation."
+    },
+    {
+      prompt:'"The testing effect describes how retrieving information from memory, such as through practice quizzes, produces stronger long-term learning than restudying the same material."',
+      cite:'"🔑 Testing effect: a phenomenon where long-term memory is increased when some of the learning period is devoted to retrieving information through testing."',
+      answer:"descriptive",
+      vClass:"mix",
+      vTitle:"Descriptive: it reads like a copied definition.",
+      checks:[
+        ["OWN WORDS?","No — it is very close to a formal definition."],
+        ["THINKING SHOWN?","Not enough, even though it sounds academic."]
+      ],
+      sign:"THE COPY-PASTE",
+      note:"Sounding academic is not the same as showing analytical thinking. If it reads like a dictionary, it may not show your understanding."
+    },
+    {
+      prompt:'"Deep processing, elaboration, and connecting new information to what you already know all improve long-term retention."',
+      cite:'"💭 This matters because I have been re-reading my notes, which feels productive, but I need to connect new ideas to things I already know if I want them to stay in memory."',
+      answer:"analytical",
+      vClass:"ok",
+      vTitle:"Analytical: a real reflection.",
+      checks:[
+        ["OWN WORDS?","Yes."],
+        ["THINKING SHOWN?","Yes — it explains why the idea matters and links it to study habits."]
+      ],
+      sign:"THE REFLECTOR",
+      note:"This goes beyond the text to say why it matters personally. That is strong analytical annotation."
+    }
+  ];
+
+  let refState = { i:0, score:0, results:[] };
+
+  const renderRef = () => {
+    const r = REFBANK[refState.i];
+
+    document.getElementById("refRoundNum").textContent = refState.i + 1;
+    document.getElementById("refRoundTotal").textContent = REFBANK.length;
+    document.getElementById("refPrompt").textContent = r.prompt;
+    document.getElementById("refClaim").textContent = r.cite;
+    document.getElementById("refClaim").classList.remove("hidden");
+
+    const card = document.getElementById("refCard");
+    card.classList.remove("reveal");
+
+    const v = document.getElementById("refVerdict");
+    v.className = "verdict";
+    v.innerHTML = "";
+
+    ["refBtnReal","refBtnFake"].forEach(id => {
+      const b = document.getElementById(id);
+      b.classList.remove("on");
+      b.setAttribute("aria-pressed","false");
+      b.disabled = false;
+    });
+
+    const nextBtn = document.getElementById("refNext");
+    nextBtn.classList.add("hidden");
+    nextBtn.textContent = refState.i === REFBANK.length - 1 ? "See your score →" : "Next example →";
+
+    renderRefDots();
+  };
+
+  const renderRefDots = () => {
+    const dots = document.getElementById("refDots");
+    dots.innerHTML = "";
+
+    for (let k = 0; k < REFBANK.length; k++) {
+      const d = document.createElement("i");
+      if (k < refState.results.length) d.className = refState.results[k] ? "hit" : "miss";
+      else if (k === refState.i) d.className = "cur";
+      dots.appendChild(d);
+    }
+  };
+
+  const judgeRef = (choice) => {
+    const r = REFBANK[refState.i];
+    const correct = choice === r.answer;
+
+    if (correct) refState.score++;
+    refState.results.push(correct);
+
+    const v = document.getElementById("refVerdict");
+    v.className = `verdict ${r.vClass}`;
+
+    const trail = r.checks
+      .map(c => `<li><span class="step">${c[0]}</span><span>${c[1]}</span></li>`)
+      .join("");
+
+    v.innerHTML = `
+      <strong>${r.vTitle}</strong> ${correct ? "You called it." : "Easy to miss by eye alone."}
+      <ul class="checktrail">${trail}</ul>
+      <p style="margin:8px 0 0">${r.note}</p>
+      <span class="signbadge">${r.sign}</span>
+    `;
+
+    document.getElementById("refCard").classList.add("reveal");
+    document.getElementById("refBtnReal").disabled = true;
+    document.getElementById("refBtnFake").disabled = true;
+    document.getElementById("refNext").classList.remove("hidden");
+
+    renderRefDots();
+  };
+
+  ["refBtnReal","refBtnFake"].forEach(id => {
+    document.getElementById(id).addEventListener("click", function () {
+      if (document.getElementById("refCard").classList.contains("reveal")) return;
+      this.classList.add("on");
+      this.setAttribute("aria-pressed","true");
+      judgeRef(this.getAttribute("data-v"));
+    });
+  });
+
+  window.nextRef = () => {
+    refState.i++;
+
+    if (refState.i >= REFBANK.length) {
+      document.getElementById("refGame").classList.add("hidden");
+      document.getElementById("refScore").textContent = refState.score;
+
+      const msg = refState.score === REFBANK.length
+        ? "You caught them all. Notice the copied-definition example especially — it sounds academic, which is why it can be easy to miss."
+        : "The copied-definition and thin-reaction examples are built to slip past a quick read. Ask: whose words are these, and what analytical thinking do they actually show?";
+
+      document.getElementById("refScoreMsg").textContent = msg;
+      document.getElementById("refSummary").classList.remove("hidden");
+      window.scrollTo(0, document.getElementById("refSummary").offsetTop - 20);
+    } else {
+      renderRef();
+    }
+  };
+
+  const resetActivities = () => {
+    document.querySelectorAll(".chip, .tok").forEach(c => {
+      c.classList.remove("picked","gA");
+      c.setAttribute("aria-pressed","false");
+    });
+
+    ["r1result","r3result","r4result","tokResult","biasResult","matchResult"].forEach(id => {
+      document.getElementById(id).classList.add("hidden");
+    });
+
+    ["checkR1","checkR2","checkR3","checkMatch"].forEach(id => {
+      const b = document.getElementById(id);
+      b.disabled = id === "checkMatch" ? false : true;
+      b.classList.remove("hidden");
+    });
+
+    document.getElementById("tokReveal").disabled = true;
+
+    document.querySelectorAll("#typegrid .flip").forEach(f => {
+      f.classList.remove("open");
+      f.setAttribute("aria-expanded","false");
+    });
+
+    document.querySelectorAll(".opt").forEach(o => {
+      o.classList.remove("sel","reveal","right","wrong");
+      o.setAttribute("aria-checked","false");
+    });
+
+    document.querySelectorAll("#matchActivity .match-row").forEach(row => {
+      row.classList.remove("reveal","right","wrong");
+      const feedback = row.querySelector(".match-feedback");
+      const answer = row.getAttribute("data-answer");
+      if (answer === "Key term") feedback.textContent = "Correct: this defines the important term “self-testing”.";
+      if (answer === "Connection") feedback.textContent = "Correct: this connects the reading to another practical learning situation.";
+      if (answer === "Reflection") feedback.textContent = "Correct: this explains why the idea matters to the learner’s own study habits.";
+      if (answer === "Investigate") feedback.textContent = "Correct: this identifies something to check later.";
+      row.querySelector("select").value = "";
+    });
+
+    refState = { i:0, score:0, results:[] };
+    document.getElementById("refGame").classList.remove("hidden");
+    document.getElementById("refSummary").classList.add("hidden");
+    renderRef();
+  };
+
+  updateRail("welcome");
+  animateBars(document.getElementById("screen-welcome"));
+  renderRef();
+})();
+</script>
+</body>
+</html>
