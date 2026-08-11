@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bridge Module | Path A: Textbook Chapter</title>
+<style>
+  :root{
+    --ink:#0b3d66; --ink-soft:#3a6a8f; --bg:#f2f5f9; --panel:#ffffff; --line:#dde5ee;
+    --red:#c1121f; --green:#5b8c00; --blue:#1d4ed8;
+    --mono:"SF Mono","Cascadia Code","Consolas","Menlo",monospace;
+    --sans:-apple-system,"Segoe UI","Helvetica Neue",Arial,sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:var(--sans);background:var(--bg);color:var(--ink);line-height:1.55;font-size:16px}
+  .wrap{max-width:760px;margin:0 auto;padding:0 16px 64px}
+  header.app{background:var(--ink);color:#fff;padding:14px 16px 0}
+  .app-inner{max-width:760px;margin:0 auto}
+  .app-title{font-weight:800;font-size:1.05rem}
+  .app-sub{font-size:.8rem;color:#b9c9db;margin:2px 0 12px}
+  .rail{display:flex;gap:4px;height:10px}
+  .rail span{flex:1;background:#2a4f6e;border-radius:2px 2px 0 0;transition:background .4s}
+  .rail span.done{background:var(--green)}
+  .rail span.now{background:#5c86a8;animation:pulse 1.6s infinite}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.45}}
+  .screen{display:none;padding-top:28px}
+  .screen.active{display:block;animation:rise .35s ease}
+  @keyframes rise{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+  h1{font-size:1.7rem;font-weight:800;line-height:1.2}
+  h2{font-size:1.3rem;font-weight:800;margin-bottom:10px}
+  h3{font-size:1.02rem;font-weight:700;margin-bottom:6px}
+  p{margin-bottom:12px}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:20px;margin-bottom:16px}
+  .btn{display:inline-block;background:var(--ink);color:#fff;border:none;border-radius:8px;padding:12px 22px;font-size:1rem;font-weight:700;font-family:var(--sans);cursor:pointer}
+  .btn:hover{background:#124c7d}
+  .btn.ghost{background:transparent;color:var(--ink);border:2px solid var(--ink)}
+  .btn.ghost:hover{background:#e8edf4}
+  .btn[disabled]{opacity:.35;cursor:not-allowed}
+  .btn.small{padding:8px 14px;font-size:.85rem}
+  .kicker{font-family:var(--mono);font-size:.72rem;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-soft);margin-bottom:6px}
+  .hero{background:var(--ink);color:#fff;border-radius:14px;padding:30px 24px;margin-bottom:18px}
+  .hero .kicker{color:#a9c2d8}
+  .hero h1{color:#fff;margin-bottom:10px}
+  .hero p{color:#cfe0ee}
+
+  .passage{font-family:var(--mono);font-size:.95rem;background:#eef2f7;border-radius:10px;padding:16px 18px;margin-bottom:16px;line-height:1.8}
+  .passage .hl{border-radius:4px;padding:2px 3px;font-weight:700;box-decoration-break:clone;-webkit-box-decoration-break:clone;white-space:normal}
+  .passage .hl-t1{background:#fde68a}
+  .passage .hl-t2{background:#bfdbfe}
+  .passage .hl-t3{background:#ddd6fe}
+  .passage .hl-t4{background:#bbf7d0}
+  .hl-key{display:flex;gap:14px;flex-wrap:wrap;font-size:.8rem;color:var(--ink-soft);margin-bottom:10px}
+  .hl-key span{display:inline-flex;align-items:center;gap:5px}
+  .hl-key i{width:12px;height:12px;border-radius:3px;display:inline-block}
+  .hl-key .k1{background:#fde68a}
+  .hl-key .k2{background:#bfdbfe}
+  .hl-key .k3{background:#ddd6fe}
+  .hl-key .k4{background:#bbf7d0}
+
+  .typetab{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px}
+  .typetab button{font-family:var(--mono);font-size:.85rem;font-weight:700;border:2px solid var(--line);background:#eef2f7;border-radius:999px;padding:8px 16px;cursor:pointer}
+  .typetab button.on{background:var(--ink);border-color:var(--ink);color:#fff}
+  .whenbox{border-left:4px solid var(--blue);background:#eef4fd;border-radius:0 10px 10px 0;padding:12px 16px;margin:12px 0;font-size:.92rem}
+
+  .pickbox{border:2px solid var(--line);border-radius:10px;padding:14px 16px;margin-bottom:10px;cursor:pointer;transition:border-color .15s,background .15s}
+  .pickbox:hover:not(.locked){border-color:var(--ink)}
+  .pickbox .optlabel{font-family:var(--mono);font-size:.72rem;font-weight:700;letter-spacing:.05em;color:var(--ink-soft);display:block;margin-bottom:6px}
+  .pickbox.locked{cursor:default}
+  .pickbox.reveal-weak{background:#fdf1f1;border-color:var(--red)}
+  .pickbox.reveal-strong{background:#f3f9ec;border-color:var(--green)}
+  .pickbox .tag{font-family:var(--mono);font-size:.7rem;font-weight:700;letter-spacing:.05em;display:none;margin-bottom:4px}
+  .pickbox.reveal-weak .tag{display:block;color:var(--red)}
+  .pickbox.reveal-strong .tag{display:block;color:#3f6b0a}
+  .pickbox .why{font-size:.85rem;color:var(--ink-soft);margin-top:8px;display:none}
+  .pickbox.revealed .why{display:block}
+  .pickbox.picked-wrong{outline:2px solid var(--red)}
+  .pickbox.picked-right{outline:2px solid var(--green)}
+
+  .feedback{margin-top:10px;font-size:.9rem;border-radius:8px;padding:10px 12px;display:none}
+  .feedback.show{display:block}
+  .feedback.ok{background:#f3f9ec;border:1px solid var(--green)}
+  .feedback.info{background:#eef4fd;border:1px solid var(--blue)}
+
+  .progress-dots{display:flex;gap:5px;margin-bottom:10px}
+  .progress-dots i{width:9px;height:9px;border-radius:50%;background:#d7e0ea;display:inline-block}
+  .progress-dots i.done{background:var(--green)}
+  .progress-dots i.now{background:var(--ink)}
+  .example-note{font-family:var(--sans);font-size:.94rem;background:#fff;border:1px solid var(--line);border-radius:8px;padding:12px 14px;margin:10px 0}
+
+  .chips{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}
+  .chip{font-family:var(--mono);font-size:.9rem;background:#eef2f7;border:2px solid var(--line);border-radius:8px;padding:9px 15px;cursor:pointer}
+  .chip:hover:not(:disabled){border-color:var(--ink)}
+  .chip.right{background:#f3f9ec;border-color:var(--green);color:#3f6b0a}
+  .chip.wrongpick{background:#fdf1f1;border-color:var(--red);color:var(--red)}
+  .chip:disabled{cursor:default}
+
+  .decision-card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:20px;margin-bottom:16px}
+  .callout{border-left:4px solid var(--blue);background:#eef4fd;border-radius:0 10px 10px 0;padding:14px 16px;margin:14px 0}
+  .callout h3{margin-bottom:4px}
+  .foot-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:8px}
+</style>
+</head>
+<body>
+<header class="app">
+  <div class="app-inner">
+    <div class="app-title">Bridge Module</div>
+    <div class="app-sub">Path A · Annotating a dense textbook passage</div>
+    <div class="rail" id="rail" aria-hidden="true">
+      <span></span><span></span><span></span><span></span><span></span><span></span><span></span>
+    </div>
+  </div>
+</header>
+<div class="wrap">
+
+<section class="screen active" id="screen-intro">
+  <div class="hero">
+    <div class="kicker">Bridging exercise · Path A</div>
+    <h1>Annotating a dense paragraph</h1>
+    <p>There are 4 types of annotation we'll focus on: <strong>Question, Connection, Reflection, Investigate</strong>. On each screen, you'll see two example annotations for the same sentence — pick which one you think is the <strong>stronger</strong> example, then see why.</p>
+  </div>
+  <div class="card">
+    <h3>The passage we'll use</h3>
+    <p style="font-size:.9rem;color:var(--ink-soft)">Read it once now. On each screen we'll highlight the part we're focusing on.</p>
+    <div class="passage">
+      Russian psychologist Lev Vygotsky theorised that cognitive development advances within children's zone of proximal development (ZPD) (Vygotsky, 1978, 1997). The ZPD refers to the level of difficulty at which children can almost, but not quite, solve a problem independently. They are able to solve the problem if they are actively assisted by an adult or a more competent peer. By using scaffolding — the guidance, support and assistance that takes place in an interactive context — the less competent learner acquires new knowledge and skills. Scaffolding consists of hints, reminders, questions and prompts to advance the learner along the road of self-discovery. The teacher, sibling, peer or parent, however, must desist from doing too much for the learner, so that the learner does not merely become a passive onlooker.
+    </div>
+    <p style="font-size:.85rem;color:var(--ink-soft)">Hoffnung (2022) 'Vygotsky' <em>Lifespan Development, 5th Australasian Edition</em> (5th ed). Wiley. Page 359.</p>
+    <button class="btn" onclick="go('t1')">Start with Question →</button>
+  </div>
+</section>
+
+<!-- TYPE 1: QUESTION -->
+<section class="screen" id="screen-t1">
+  <div class="kicker">Type 1 of 4</div>
+  <h2>❓ Question</h2>
+  <div class="typetab">
+    <button class="on">❓ Question</button>
+    <button disabled>🔗 Connection</button>
+    <button disabled>💭 Reflection</button>
+    <button disabled>🔍 Investigate</button>
+  </div>
+  <div class="card">
+    <div class="hl-key"><span><i class="k1"></i>This level's focus</span></div>
+    <div class="passage">
+      Russian psychologist Lev Vygotsky theorised that cognitive development advances within children's zone of proximal development (ZPD) (Vygotsky, 1978, 1997). The ZPD refers <span class="hl hl-t1">to the level of difficulty at which children can almost, but not quite, solve a problem independently.</span> They are able to solve the problem if they are actively assisted by an adult or a more competent peer. By using scaffolding — the guidance, support and assistance that takes place in an interactive context — the less competent learner acquires new knowledge and skills. Scaffolding consists of hints, reminders, questions and prompts to advance the learner along the road of self-discovery. The teacher, sibling, peer or parent, however, must desist from doing too much for the learner, so that the learner does not merely become a passive onlooker.
+    </div>
+
+    <p style="font-size:.9rem;color:var(--ink-soft)">Which of these two annotations is the <strong>stronger</strong> Question?</p>
+    <div id="pick-t1"></div>
+
+    <div class="whenbox"><strong>Use Question when:</strong> you're genuinely unsure about something, or the text makes you think "but what about...?" and you don't know the answer.</div>
+
+    <button class="btn" id="next1" onclick="go('t2')" disabled style="margin-top:16px">Next: Connection →</button>
+  </div>
+</section>
+
+<!-- TYPE 2: CONNECTION -->
+<section class="screen" id="screen-t2">
+  <div class="kicker">Type 2 of 4</div>
+  <h2>🔗 Connection</h2>
+  <div class="typetab">
+    <button onclick="go('t1')">❓ Question</button>
+    <button class="on">🔗 Connection</button>
+    <button disabled>💭 Reflection</button>
+    <button disabled>🔍 Investigate</button>
+  </div>
+  <div class="card">
+    <div class="hl-key"><span><i class="k2"></i>This level's focus</span></div>
+    <div class="passage">
+      Russian psychologist Lev Vygotsky theorised that cognitive development advances within children's zone of proximal development (ZPD) (Vygotsky, 1978, 1997). The ZPD refers to the level of difficulty at which children can almost, but not quite, solve a problem independently. They are able to solve the problem if they are actively assisted by an adult or a more competent peer. <span class="hl hl-t2">By using scaffolding — the guidance, support and assistance that takes place in an interactive context — the less competent learner acquires new knowledge and skills.</span> Scaffolding consists of hints, reminders, questions and prompts to advance the learner along the road of self-discovery. The teacher, sibling, peer or parent, however, must desist from doing too much for the learner, so that the learner does not merely become a passive onlooker.
+    </div>
+
+    <p style="font-size:.9rem;color:var(--ink-soft)">Which of these two annotations is the <strong>stronger</strong> Connection?</p>
+    <div id="pick-t2"></div>
+
+    <div class="whenbox"><strong>Use Connection when:</strong> the idea reminds you of something specific — something you already know, something from your own life, or something from another class.</div>
+
+    <button class="btn" id="next2" onclick="go('t3')" disabled style="margin-top:16px">Next: Reflection →</button>
+  </div>
+</section>
+
+<!-- TYPE 3: REFLECTION -->
+<section class="screen" id="screen-t3">
+  <div class="kicker">Type 3 of 4</div>
+  <h2>💭 Reflection</h2>
+  <div class="typetab">
+    <button onclick="go('t1')">❓ Question</button>
+    <button onclick="go('t2')">🔗 Connection</button>
+    <button class="on">💭 Reflection</button>
+    <button disabled>🔍 Investigate</button>
+  </div>
+  <div class="card">
+    <div class="hl-key"><span><i class="k3"></i>This level's focus</span></div>
+    <div class="passage">
+      Russian psychologist Lev Vygotsky theorised that cognitive development advances within children's zone of proximal development (ZPD) (Vygotsky, 1978, 1997). The ZPD refers to the level of difficulty at which children can almost, but not quite, solve a problem independently. They are able to solve the problem if they are actively assisted by an adult or a more competent peer. By using scaffolding — the guidance, support and assistance that takes place in an interactive context — the less competent learner acquires new knowledge and skills. Scaffolding consists of hints, reminders, questions and prompts to advance the learner along the road of self-discovery. <span class="hl hl-t3">The teacher, sibling, peer or parent, however, must desist from doing too much for the learner, so that the learner does not merely become a passive onlooker.</span>
+    </div>
+
+    <p style="font-size:.9rem;color:var(--ink-soft)">Which of these two annotations is the <strong>stronger</strong> Reflection?</p>
+    <div id="pick-t3"></div>
+
+    <div class="whenbox"><strong>Use Reflection when:</strong> the idea changes how you see something, or you notice a difference or assumption you hadn't spotted before.</div>
+
+    <button class="btn" id="next3" onclick="go('t4')" disabled style="margin-top:16px">Next: Investigate →</button>
+  </div>
+</section>
+
+<!-- TYPE 4: INVESTIGATE -->
+<section class="screen" id="screen-t4">
+  <div class="kicker">Type 4 of 4</div>
+  <h2>🔍 Investigate</h2>
+  <div class="typetab">
+    <button onclick="go('t1')">❓ Question</button>
+    <button onclick="go('t2')">🔗 Connection</button>
+    <button onclick="go('t3')">💭 Reflection</button>
+    <button class="on">🔍 Investigate</button>
+  </div>
+  <div class="card">
+    <div class="hl-key"><span><i class="k4"></i>This level's focus</span></div>
+    <div class="passage">
+      Russian psychologist Lev Vygotsky theorised that cognitive development advances within children's zone of proximal development (ZPD) <span class="hl hl-t4">(Vygotsky, 1978, 1997).</span> The ZPD refers to the level of difficulty at which children can almost, but not quite, solve a problem independently. They are able to solve the problem if they are actively assisted by an adult or a more competent peer. By using scaffolding — the guidance, support and assistance that takes place in an interactive context — the less competent learner acquires new knowledge and skills. Scaffolding consists of hints, reminders, questions and prompts to advance the learner along the road of self-discovery. The teacher, sibling, peer or parent, however, must desist from doing too much for the learner, so that the learner does not merely become a passive onlooker.
+    </div>
+
+    <p style="font-size:.9rem;color:var(--ink-soft)">Which of these two annotations is the <strong>stronger</strong> Investigate?</p>
+    <div id="pick-t4"></div>
+
+    <div class="whenbox"><strong>Use Investigate when:</strong> there's a specific claim, source, or study you'd genuinely want to check or explore later — not just an unfamiliar name on its own.</div>
+
+    <button class="btn" id="next4" onclick="go('final')" disabled style="margin-top:16px">Try the final activity →</button>
+  </div>
+</section>
+
+<!-- FINAL ACTIVITY: TYPE-ID FROM POOL OF 16, SCORED -->
+<section class="screen" id="screen-final">
+  <div class="kicker">Final activity</div>
+  <h2>What type is this?</h2>
+  <div class="decision-card">
+    <p style="font-size:.92rem;color:var(--ink-soft)">You'll see 8 short statements, drawn at random — 2 from each of the 4 types. For each one, pick which type of annotation it is.</p>
+    <div id="finalRound"></div>
+  </div>
+</section>
+
+<!-- FINISH PANEL -->
+<section class="screen" id="screen-finish">
+  <div class="kicker">Path A complete</div>
+  <h2>Your results</h2>
+  <div class="card">
+    <p id="scoreLine" style="font-size:1.1rem;font-weight:700"></p>
+    <div class="callout" style="margin-top:16px">
+      <h3>Why this matters</h3>
+      <p style="margin:0 0 8px">Annotating isn't the end goal — it's the thinking that happens <em>before</em> you write. Every time you annotate, ask yourself:</p>
+      <p style="margin:0 0 4px"><strong>Why am I making this annotation?</strong></p>
+      <p style="margin:0">What will it help me do — build an argument, find evidence, question an assumption, or connect ideas? Strong annotations are the first step towards strong paragraphs: each one is a small unit of thinking that can grow into a topic sentence, a piece of evidence, or a critical point in your writing.</p>
+    </div>
+  </div>
+  <div class="foot-actions">
+    <button class="btn ghost" onclick="go('intro')">Restart Path A</button>
+  </div>
+</section>
+
+</div>
+<script>
+(function(){
+  "use strict";
+  var order = ["intro","t1","t2","t3","t4","final","finish"];
+  window.go = function(id){
+    document.querySelectorAll(".screen").forEach(function(s){ s.classList.remove("active"); });
+    document.getElementById("screen-"+id).classList.add("active");
+    window.scrollTo(0,0);
+    updateRail(id);
+    if (id === "final" && !document.getElementById("finalRound").dataset.built){
+      document.getElementById("finalRound").dataset.built = "true";
+      buildFinal();
+    }
+  };
+  function updateRail(current){
+    var idx = order.indexOf(current);
+    var cells = document.querySelectorAll("#rail span");
+    cells.forEach(function(c,i){
+      c.className = "";
+      if (i < idx) c.classList.add("done");
+      else if (i === idx) c.classList.add("now");
+    });
+  }
+  function shuffle(arr){
+    var a = arr.slice();
+    for (var i=a.length-1;i>0;i--){
+      var j = Math.floor(Math.random()*(i+1));
+      var t=a[i]; a[i]=a[j]; a[j]=t;
+    }
+    return a;
+  }
+
+  // Pick-the-strong pairs — Hannah's own weak/strong examples per type, unlabelled, shuffled A/B.
+  var PAIRS = {
+    t1: {
+      weak: {note:"Maybe like when we are given a maths problem?", why:"This is close, but what the section of text refers to is not just any maths problem, but the selection of the 'right sort of problem', one that a student who is learning can almost complete. For example, giving a simple addition or subtraction problem to a 7-year-old, vs a quantum physics formula."},
+      strong: {note:"Like when I went from learning single-digit multiplication to two-digit multiplication?", why:"This is a good example, which helps explain the concept. The idea here is that learning happens when a problem is just out of reach, but not too far out of reach. In this case, learning supports are still required (two-digit multiplication is still a challenge!) but the knowledge of single-digit multiplication will support the learning of the two-digit multiplication."}
+    },
+    t2: {
+      weak: {note:"Like a canvas page for a course", why:"This identifies a possible connection, but it does not explain how the course page relates to scaffolding. Without this being stated explicitly, the connection isn't clear."},
+      strong: {note:"The way Canvas modules divide a course into connected topics resembles scaffolding because each module provides knowledge that supports the next stage of learning.", why:"This shows how the connection between the idea of scaffolding and the way that course modules are constructed create the environment for learning."}
+    },
+    t3: {
+      weak: {note:"When my teacher went through all the details of the task so I knew exactly what I needed to do", why:"This describes an experience, but it does not explain your response to the idea of scaffolding."},
+      strong: {note:"Learning a somersault with a coach made me realise that support is most useful when it helps me attempt a difficult task rather than doing it for me.", why:"This demonstrates an understanding of the concept. To complete a somersault, you may have watched another person complete one (for this you may have been a passive onlooker) but you also tried the new task yourself with the support from the coach nearby."}
+    },
+    t4: {
+      weak: {note:"These are references", why:"This identifies information in the text but does not show that you want to explore it further."},
+      strong: {note:"I would investigate how Vygotsky's theory has been extended or interpreted since the original work cited in this passage", why:"This is more clearly an investigation and avoids implying that students should resolve a potentially complex bibliographic question without additional context."}
+    }
+  };
+
+  function buildPick(containerId, pairKey, nextBtnId){
+    var container = document.getElementById(containerId);
+    var pair = PAIRS[pairKey];
+    var options = shuffle([
+      Object.assign({kind:"weak"}, pair.weak),
+      Object.assign({kind:"strong"}, pair.strong)
+    ]);
+    var letters = ["A","B"];
+
+    container.innerHTML = options.map(function(opt, idx){
+      return '<div class="pickbox" data-kind="'+opt.kind+'" data-idx="'+idx+'">' +
+        '<span class="optlabel">EXAMPLE ' + letters[idx] + '</span>' +
+        '<span class="tag">' + (opt.kind==="strong" ? "✅ STRONG" : "❌ WEAK") + '</span>' +
+        '"' + opt.note + '"' +
+        '<div class="why">' + opt.why + '</div>' +
+      '</div>';
+    }).join("");
+
+    var boxes = container.querySelectorAll(".pickbox");
+    boxes.forEach(function(box){
+      box.addEventListener("click", function(){
+        if (box.classList.contains("locked")) return;
+        var picked = box.getAttribute("data-kind");
+        var correct = picked === "strong";
+
+        boxes.forEach(function(b){
+          b.classList.add("locked", "revealed");
+          var k = b.getAttribute("data-kind");
+          b.classList.add(k === "strong" ? "reveal-strong" : "reveal-weak");
+        });
+        box.classList.add(correct ? "picked-right" : "picked-wrong");
+
+        document.getElementById(nextBtnId).disabled = false;
+      });
+    });
+  }
+
+  buildPick("pick-t1","t1","next1");
+  buildPick("pick-t2","t2","next2");
+  buildPick("pick-t3","t3","next3");
+  buildPick("pick-t4","t4","next4");
+
+  // FINAL ACTIVITY: pool of Hannah's 16 statements, 2 drawn at random per type (8 total), shuffled together, scored.
+  var TYPE_LABELS = {Question:"❓ Question", Connection:"🔗 Connection", Reflection:"💭 Reflection", Investigate:"🔍 Investigate"};
+  var TYPES = ["Question","Connection","Reflection","Investigate"];
+  var POOL = {
+    Question: [
+      "I am unsure why Vygotsky believed that learners should not receive too much assistance.",
+      "What makes a task part of a learner's zone of proximal development?",
+      "I wonder how a teacher knows when to provide a hint rather than a full explanation.",
+      "Why does the text describe the learner as an active participant rather than a passive onlooker?"
+    ],
+    Connection: [
+      "Learning two-digit multiplication connects with the idea that new skills build on knowledge we already have.",
+      "A coach helping someone learn a somersault is similar to scaffolding because the learner receives support while attempting the task.",
+      "The modules in an online course connect with scaffolding because each topic can prepare students for the next one.",
+      "Vygotsky's idea of learning with support connects with my experience of using worked examples before solving problems independently."
+    ],
+    Reflection: [
+      "This passage makes me reconsider whether giving students every step of a task supports or limits their learning.",
+      "I had assumed that struggling meant I was failing, but this text suggests that an appropriate challenge can support learning.",
+      "The idea of scaffolding makes me think about how my own learning changes when support is gradually removed.",
+      "This theory has changed how I understand the role of a teacher, from providing answers to guiding students towards them."
+    ],
+    Investigate: [
+      "I would investigate how scaffolding is used in online courses.",
+      "I would research whether scaffolding is effective for adult learners as well as children.",
+      "I would investigate how teachers decide when to withdraw support from a learner.",
+      "I would research how Vygotsky's theory has been developed or applied since the sources cited in the passage."
+    ]
+  };
+
+  function buildFinal(){
+    var container = document.getElementById("finalRound");
+    var items = [];
+    TYPES.forEach(function(t){
+      var pick = shuffle(POOL[t]).slice(0,2);
+      pick.forEach(function(note){ items.push({note:note, answer:t}); });
+    });
+    items = shuffle(items);
+    var state = { i: 0, score: 0 };
+
+    function render(){
+      var ex = items[state.i];
+      container.innerHTML =
+        '<div class="progress-dots">' + items.map(function(_,k){
+          var cls = k < state.i ? "done" : (k === state.i ? "now" : "");
+          return '<i class="'+cls+'"></i>';
+        }).join("") + '</div>' +
+        '<p style="font-size:.9rem;color:var(--ink-soft);margin-bottom:6px">Item ' + (state.i+1) + ' of ' + items.length + '</p>' +
+        '<div class="example-note">"' + ex.note + '"</div>' +
+        '<div class="chips">' +
+          TYPES.map(function(t){ return '<button class="chip" data-type="'+t+'">'+TYPE_LABELS[t]+'</button>'; }).join("") +
+        '</div>' +
+        '<div class="feedback" id="final-feedback"></div>' +
+        '<button class="btn small" id="final-nextEx" style="margin-top:10px" disabled>' +
+          (state.i < items.length-1 ? 'Next →' : 'See your results →') +
+        '</button>';
+
+      var chips = container.querySelectorAll(".chips .chip");
+      chips.forEach(function(chip){
+        chip.addEventListener("click", function(){
+          if (chip.disabled) return;
+          chips.forEach(function(c){ c.disabled = true; });
+          var picked = chip.getAttribute("data-type");
+          var correct = picked === ex.answer;
+          if (correct) state.score++;
+          chip.classList.add(correct ? "right" : "wrongpick");
+          if (!correct){
+            chips.forEach(function(c){ if (c.getAttribute("data-type")===ex.answer) c.classList.add("right"); });
+          }
+          var fb = document.getElementById("final-feedback");
+          fb.classList.add("show");
+          fb.className = "feedback show " + (correct ? "ok" : "info");
+          fb.textContent = correct ? "Correct — that's " + TYPE_LABELS[ex.answer] + "." : "Actually, this is " + TYPE_LABELS[ex.answer] + ".";
+          document.getElementById("final-nextEx").disabled = false;
+        });
+      });
+
+      document.getElementById("final-nextEx").addEventListener("click", function(){
+        if (state.i < items.length-1){
+          state.i++;
+          render();
+        } else {
+          document.getElementById("scoreLine").textContent = "You scored " + state.score + " out of " + items.length + ".";
+          go("finish");
+        }
+      });
+    }
+    render();
+  }
+
+  updateRail("intro");
+})();
+</script>
+</body>
+</html>
