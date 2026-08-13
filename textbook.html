@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
+<head
+  
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Bridge Module | Path A: Textbook Chapter</title>
@@ -424,7 +425,7 @@
           var fb = document.getElementById("final-feedback");
           fb.classList.add("show");
           fb.className = "feedback show " + (correct ? "ok" : "info");
-          fb.textContent = correct ? "Correct — that's " + TYPE_LABELS[ex.answer] + "." : "Actually, this is " + TYPE_LABELS[ex.answer] + ".";
+          fb.textContent = correct ? "Correct! That's " + TYPE_LABELS[ex.answer] + "." : "Actually, this is " + TYPE_LABELS[ex.answer] + ".";
           document.getElementById("final-nextEx").disabled = false;
         });
       });
